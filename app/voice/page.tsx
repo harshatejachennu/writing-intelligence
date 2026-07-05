@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { AgentRunner } from "@/components/agent-runner";
+import { WorkflowModeBar, type ModeChoice } from "@/components/mode-control";
 import type { VoiceProfile } from "@/lib/schemas/voice-profile";
 
 interface SavedProfile {
@@ -16,6 +17,7 @@ export default function VoicePage() {
   const [result, setResult] = useState<VoiceProfile | null>(null);
   const [savedId, setSavedId] = useState<string | null>(null);
   const [saved, setSaved] = useState<SavedProfile[]>([]);
+  const [wfMode, setWfMode] = useState<ModeChoice>("auto");
 
   useEffect(() => {
     fetch("/api/voice")
@@ -38,6 +40,7 @@ export default function VoicePage() {
 
       {!result && (
         <div className="space-y-3">
+          <WorkflowModeBar value={wfMode} onChange={setWfMode} />
           {samples.map((s, i) => (
             <textarea
               key={i}
@@ -59,6 +62,7 @@ export default function VoicePage() {
           )}
           {validSamples.length > 0 && (
             <AgentRunner
+              modeOverride={wfMode}
               agentId="voice"
               input={{ samples: validSamples }}
               buttonLabel="Infer voice profile"

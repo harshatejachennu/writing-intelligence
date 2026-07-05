@@ -5,12 +5,14 @@ import { ManualModePanel } from "./manual-mode-panel";
 import { TechniqueCardView } from "./technique-card";
 import type { Analysis } from "@/lib/schemas/analyzer";
 import type { Extraction } from "@/lib/schemas/technique-card";
+import type { ModeChoice } from "./mode-control";
 
 interface Props {
   analysis: Analysis;
   passageText?: string;
   genre?: string;
   analysisId?: string | null;
+  modeOverride?: ModeChoice;
 }
 
 type Built = { mode: "manual" | "api"; copyText: string };
@@ -19,7 +21,7 @@ type Built = { mode: "manual" | "api"; copyText: string };
  * "Extract technique cards" flow — attachable to any analysis (fresh or saved).
  * Runs the extractor agent through the same dual-mode build/submit pipeline.
  */
-export function ExtractCards({ analysis, passageText, genre, analysisId }: Props) {
+export function ExtractCards({ analysis, passageText, genre, analysisId, modeOverride = "auto" }: Props) {
   const [built, setBuilt] = useState<Built | null>(null);
   const [extraction, setExtraction] = useState<Extraction | null>(null);
   const [savedCount, setSavedCount] = useState<number | null>(null);
@@ -40,7 +42,7 @@ export function ExtractCards({ analysis, passageText, genre, analysisId }: Props
       const res = await fetch("/api/prompt/build", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ agentId: "extractor", input }),
+        body: JSON.stringify({ agentId: "extractor", input, modeOverride }),
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? "Failed to build prompt");
@@ -50,7 +52,7 @@ export function ExtractCards({ analysis, passageText, genre, analysisId }: Props
         const run = await fetch("/api/prompt/submit", {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ agentId: "extractor", input }),
+          body: JSON.stringify({ agentId: "extractor", input, modeOverride }),
         });
         const rj = await run.json();
         if (!run.ok || !rj.ok) throw new Error(rj.error ?? "API run failed");
@@ -107,6 +109,7 @@ export function ExtractCards({ analysis, passageText, genre, analysisId }: Props
           agentId="extractor"
           input={input}
           copyText={built.copyText}
+          modeOverride={modeOverride}
           onValidated={(data, meta) => {
             setExtraction(data as Extraction);
             setSavedCount(meta.cardIds?.length ?? 0);

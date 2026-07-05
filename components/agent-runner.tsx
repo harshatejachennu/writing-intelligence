@@ -2,12 +2,15 @@
 
 import { useState } from "react";
 import { ManualModePanel, type ValidatedMeta } from "./manual-mode-panel";
+import { StepModeSelect, useExecutionStatus, type ModeChoice } from "./mode-control";
 
 interface Props {
   agentId: string;
   input: unknown;
   buttonLabel: string;
   onDone: (data: unknown, meta: ValidatedMeta) => void;
+  /** Workflow-level mode from the page's WorkflowModeBar ("auto" defers to preference). */
+  modeOverride?: ModeChoice;
   /** Start immediately instead of showing the button. */
   autoStart?: boolean;
 }
@@ -16,15 +19,21 @@ type Built = { mode: "manual" | "api"; copyText: string };
 
 /**
  * Runs one agent step through the dual-mode pipeline:
- * button → build prompt → API run (if keyed) or Manual-Mode paste panel.
- * Every wizard step in the app is one of these.
+ * button → build prompt → API run (if resolved api) or Manual-Mode paste panel.
+ * The per-step selector can override the workflow-level mode; the effective
+ * choice is sent as modeOverride so the server resolution + receipts record it.
  */
-export function AgentRunner({ agentId, input, buttonLabel, onDone, autoStart }: Props) {
+export function AgentRunner({ agentId, input, buttonLabel, onDone, modeOverride = "auto", autoStart }: Props) {
   const [built, setBuilt] = useState<Built | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [apiError, setApiError] = useState<string | null>(null);
   const [started, setStarted] = useState(false);
+  const [stepMode, setStepMode] = useState<ModeChoice>("auto");
+  const status = useExecutionStatus();
+
+  // Per-step override wins over the workflow-level choice.
+  const effectiveChoice: ModeChoice = stepMode !== "auto" ? stepMode : modeOverride;
 
   async function start() {
     setBusy(true);
@@ -34,7 +43,7 @@ export function AgentRunner({ agentId, input, buttonLabel, onDone, autoStart }: 
       const res = await fetch("/api/prompt/build", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ agentId, input }),
+        body: JSON.stringify({ agentId, input, modeOverride: effectiveChoice }),
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? "Failed to build prompt");
@@ -44,7 +53,7 @@ export function AgentRunner({ agentId, input, buttonLabel, onDone, autoStart }: 
         const run = await fetch("/api/prompt/submit", {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ agentId, input }),
+          body: JSON.stringify({ agentId, input, modeOverride: effectiveChoice }),
         });
         const rj = await run.json();
         if (!run.ok || !rj.ok) throw new Error(rj.error ?? "API run failed");
@@ -58,7 +67,11 @@ export function AgentRunner({ agentId, input, buttonLabel, onDone, autoStart }: 
         } else {
           // Provider call failed → degrade to Manual Mode with the error shown.
           setBuilt({ mode: "manual", copyText: rj.prompt?.copyText ?? json.copyText });
-          setApiError(rj.apiError ?? "API call failed — use Manual Mode below.");
+          setApiError(
+            rj.fallbackReason
+              ? `${rj.fallbackReason}: ${rj.apiError ?? ""}`
+              : (rj.apiError ?? "API call failed — use Manual Mode below."),
+          );
         }
       }
     } catch (e) {
@@ -74,13 +87,21 @@ export function AgentRunner({ agentId, input, buttonLabel, onDone, autoStart }: 
   return (
     <div className="space-y-3">
       {!built && !autoStart && (
-        <button
-          onClick={start}
-          disabled={busy}
-          className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-40 dark:bg-slate-100 dark:text-slate-900"
-        >
-          {busy ? "Working…" : buttonLabel}
-        </button>
+        <div className="flex flex-wrap items-center gap-3">
+          <button
+            onClick={start}
+            disabled={busy}
+            className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-40 dark:bg-slate-100 dark:text-slate-900"
+          >
+            {busy ? "Working…" : buttonLabel}
+          </button>
+          <StepModeSelect
+            value={stepMode}
+            onChange={setStepMode}
+            disabled={busy}
+            apiAvailable={status?.anyKey ?? false}
+          />
+        </div>
       )}
       {busy && built === null && autoStart && (
         <p className="text-sm text-slate-500">Building prompt…</p>
@@ -96,6 +117,7 @@ export function AgentRunner({ agentId, input, buttonLabel, onDone, autoStart }: 
           agentId={agentId}
           input={input}
           copyText={built.copyText}
+          modeOverride={effectiveChoice}
           onValidated={onDone}
         />
       )}

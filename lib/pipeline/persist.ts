@@ -1,4 +1,5 @@
 import type { ExecutionMode } from "@/lib/models/routes";
+import type { RouteReceipt } from "@/lib/models/execute";
 import { saveAnalysis, logPipelineStep } from "./log";
 import { saveExtraction } from "./techniques";
 import { saveGoalProfile, saveStrategyPlan, saveGeneration } from "./generation";
@@ -38,6 +39,8 @@ export async function persistAgentOutput(args: {
   usage?: { promptTokens?: number; completionTokens?: number };
   rawModel?: string;
   latencyMs?: number;
+  receipt?: RouteReceipt;
+  schemaValid?: boolean;
 }): Promise<{
   savedId: string | null;
   passageId: string | null;
@@ -157,6 +160,8 @@ export async function persistAgentOutput(args: {
     usage: args.usage,
     rawModel: args.rawModel,
     latencyMs: args.latencyMs,
+    receipt: args.receipt,
+    schemaValid: args.schemaValid,
   });
 
   return { savedId, passageId, pipelineRunId, documentId, cardIds, techniqueSlugs };

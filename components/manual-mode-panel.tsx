@@ -14,6 +14,8 @@ interface Props {
   input: unknown;
   copyText: string;
   onValidated: (data: unknown, meta: ValidatedMeta) => void;
+  /** Original mode choice, recorded in the route receipt as requested_mode. */
+  modeOverride?: "auto" | "manual" | "api";
 }
 
 /**
@@ -21,7 +23,7 @@ interface Props {
  * chatbot; right = paste-back + Validate & Save. On validation failure it shows
  * field-level errors and a one-click "Copy fix-it prompt".
  */
-export function ManualModePanel({ agentId, input, copyText, onValidated }: Props) {
+export function ManualModePanel({ agentId, input, copyText, onValidated, modeOverride }: Props) {
   const [pasted, setPasted] = useState("");
   const [manualModel, setManualModel] = useState("");
   const [busy, setBusy] = useState(false);
@@ -43,7 +45,7 @@ export function ManualModePanel({ agentId, input, copyText, onValidated }: Props
       const res = await fetch("/api/prompt/submit", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ agentId, input, pastedText: pasted, manualModel }),
+        body: JSON.stringify({ agentId, input, pastedText: pasted, manualModel, modeOverride }),
       });
       const json = await res.json();
       if (res.ok && json.ok) {

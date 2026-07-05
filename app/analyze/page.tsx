@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ManualModePanel } from "@/components/manual-mode-panel";
 import { FunctionMap } from "@/components/function-map";
 import { ExtractCards } from "@/components/extract-cards";
+import { WorkflowModeBar, type ModeChoice } from "@/components/mode-control";
 import type { Analysis } from "@/lib/schemas/analyzer";
 
 type Built = { mode: "manual" | "api"; copyText: string; schemaHint: string };
@@ -18,6 +19,7 @@ export default function AnalyzePage() {
   const [analysisId, setAnalysisId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [wfMode, setWfMode] = useState<ModeChoice>("auto");
 
   const input = { passageText: passage, genre: genre || undefined };
 
@@ -30,7 +32,7 @@ export default function AnalyzePage() {
       const res = await fetch("/api/prompt/build", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ agentId: "analyzer", input }),
+        body: JSON.stringify({ agentId: "analyzer", input, modeOverride: wfMode }),
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? "Failed to build prompt");
@@ -41,7 +43,7 @@ export default function AnalyzePage() {
         const run = await fetch("/api/prompt/submit", {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ agentId: "analyzer", input }),
+          body: JSON.stringify({ agentId: "analyzer", input, modeOverride: wfMode }),
         });
         const rj = await run.json();
         if (!run.ok || !rj.ok) throw new Error(rj.error ?? "API run failed");
@@ -68,6 +70,7 @@ export default function AnalyzePage() {
 
       {!analysis && (
         <div className="space-y-3">
+          <WorkflowModeBar value={wfMode} onChange={setWfMode} />
           <textarea
             value={passage}
             onChange={(e) => setPassage(e.target.value)}
@@ -109,6 +112,7 @@ export default function AnalyzePage() {
           agentId="analyzer"
           input={input}
           copyText={built.copyText}
+          modeOverride={wfMode}
           onValidated={(data, meta) => {
             setAnalysis(data as Analysis);
             setAnalysisId(meta.savedId);
@@ -139,6 +143,7 @@ export default function AnalyzePage() {
               passageText={passage}
               genre={genre || undefined}
               analysisId={analysisId}
+              modeOverride={wfMode}
             />
           </div>
         </div>

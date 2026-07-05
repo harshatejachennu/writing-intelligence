@@ -15,6 +15,9 @@ loadEnvLocal();
 const { check, done } = makeChecker();
 
 async function main() {
+  // Pin the api-first preference: this suite tests route overrides + fallback
+  // mechanics, independent of the global EXECUTION_PREFERENCE default (smart).
+  process.env.EXECUTION_PREFERENCE = "api_first_manual_fallback";
   const { getRoute, resolveMode, MODEL_ROUTES } = await import("@/lib/models/routes");
 
   // ── Route overrides ─────────────────────────────────────────────────────────

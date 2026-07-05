@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { AgentRunner } from "@/components/agent-runner";
+import { WorkflowModeBar, type ModeChoice } from "@/components/mode-control";
 import { Scorecard } from "@/components/scorecard";
 import { overallScore, type Critique } from "@/lib/schemas/critique";
 import type { Revision } from "@/lib/schemas/revision";
@@ -23,6 +24,7 @@ export default function CritiquePage() {
   const [documentId, setDocumentId] = useState<string | null>(null);
   const [rounds, setRounds] = useState<Round[]>([]);
   const [phase, setPhase] = useState<"input" | "critiqued" | "revised">("input");
+  const [wfMode, setWfMode] = useState<ModeChoice>("auto");
 
   const current = rounds[rounds.length - 1] ?? null;
   const prevOverall = rounds.length >= 2 ? overallScore(rounds[rounds.length - 2].critique) : null;
@@ -48,6 +50,8 @@ export default function CritiquePage() {
         </p>
       </div>
 
+      <WorkflowModeBar value={wfMode} onChange={setWfMode} />
+
       {/* ── Input ───────────────────────────────────────────────────────── */}
       {phase === "input" && (
         <div className="space-y-3">
@@ -65,6 +69,7 @@ export default function CritiquePage() {
           />
           {text.trim().length >= 50 && (
             <AgentRunner
+              modeOverride={wfMode}
               agentId="critic"
               input={{ text, genre: genre || undefined, documentId: documentId ?? undefined }}
               buttonLabel="Critique this draft"
@@ -149,6 +154,7 @@ export default function CritiquePage() {
                 ) : null}
                 {!round.critique.goal_met && rounds.length < MAX_ROUNDS && !plateaued && (
                   <AgentRunner
+              modeOverride={wfMode}
                     agentId="reviser"
                     input={{
                       text,
@@ -177,6 +183,7 @@ export default function CritiquePage() {
 
             {isLast && phase === "revised" && round.revision && rounds.length < MAX_ROUNDS && (
               <AgentRunner
+              modeOverride={wfMode}
                 agentId="critic"
                 input={{ text, genre: genre || undefined, documentId: documentId ?? undefined }}
                 buttonLabel="Re-critique the revision"

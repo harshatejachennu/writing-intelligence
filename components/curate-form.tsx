@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { AgentRunner } from "./agent-runner";
+import { WorkflowModeBar, type ModeChoice } from "./mode-control";
 
 /** "Curate a lead" flow: description (+ optional excerpt) → curator agent → saved row. */
 export function CurateForm() {
@@ -12,6 +13,7 @@ export function CurateForm() {
   const [excerpt, setExcerpt] = useState("");
   const [userOwned, setUserOwned] = useState(false);
   const [savedMsg, setSavedMsg] = useState<string | null>(null);
+  const [wfMode, setWfMode] = useState<ModeChoice>("auto");
 
   if (!open) {
     return (
@@ -30,6 +32,7 @@ export function CurateForm() {
   return (
     <div className="space-y-3 rounded-lg border border-slate-200 p-4 dark:border-slate-800">
       <h2 className="text-sm font-medium">Curate a source</h2>
+      <WorkflowModeBar value={wfMode} onChange={setWfMode} />
       <textarea
         value={description}
         onChange={(e) => setDescription(e.target.value)}
@@ -48,6 +51,7 @@ export function CurateForm() {
       </label>
       {description.trim().length >= 10 && (
         <AgentRunner
+          modeOverride={wfMode}
           agentId="curator"
           input={{
             description,

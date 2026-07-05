@@ -1,7 +1,9 @@
 import {
   MODEL_ROUTES,
   getRoute,
-  resolveMode,
+  resolveExecution,
+  getExecutionPreference,
+  openrouterDefaultModel,
   hasApiKey,
   type RouteKey,
   type Provider,
@@ -11,7 +13,15 @@ import { canEmbed } from "@/lib/retrieval/embed";
 
 export const dynamic = "force-dynamic";
 
-const PROVIDERS: Provider[] = ["anthropic", "openai", "google"];
+const PROVIDERS: Provider[] = ["anthropic", "openrouter", "openai", "google"];
+
+const PREFERENCE_BEHAVIOR: Record<string, string> = {
+  manual_only: "Every step runs Manual. API is never called.",
+  api_only: "Every step runs API. Failures ERROR — no Manual fallback.",
+  smart: "Quality steps (analyzer, planner, generator, critic, reviser, inspiration) run Manual; structured steps run API when a key exists.",
+  api_first_manual_fallback: "API when a key exists; Manual otherwise. API failures (timeout, rate limit, invalid JSON) fall back to Manual.",
+  manual_first_api_optional: "Manual by default; API available as a per-step opt-in when a key exists.",
+};
 
 export default async function SettingsPage() {
   const routeKeys = Object.keys(MODEL_ROUTES) as RouteKey[];
@@ -35,6 +45,9 @@ export default async function SettingsPage() {
               <span className="font-mono text-xs">{p}</span>
               <span className="text-slate-500">
                 {hasApiKey(p) ? "key configured — API mode available" : "no key — Manual Mode"}
+                {p === "openrouter" && hasApiKey(p) && (
+                  <> · default model <code>{openrouterDefaultModel()}</code></>
+                )}
               </span>
             </li>
           ))}
@@ -56,6 +69,28 @@ export default async function SettingsPage() {
       </section>
 
       <section className="rounded-lg border border-slate-200 p-4 dark:border-slate-800">
+        <h2 className="text-sm font-medium">Execution preference</h2>
+        <div className="mt-2 flex flex-wrap items-center gap-2 text-sm">
+          <span className="rounded bg-slate-900 px-2 py-0.5 font-mono text-xs text-white dark:bg-slate-100 dark:text-slate-900">
+            {getExecutionPreference()}
+          </span>
+          <span className="text-slate-600 dark:text-slate-400">
+            {PREFERENCE_BEHAVIOR[getExecutionPreference()]}
+          </span>
+        </div>
+        <div className="mt-3 rounded bg-slate-100 p-3 text-xs text-slate-600 dark:bg-slate-900 dark:text-slate-400">
+          Set via <code>EXECUTION_PREFERENCE</code> (manual_only · api_only · smart ·
+          api_first_manual_fallback · manual_first_api_optional). Every workflow page has a
+          mode bar, and each step has its own auto/manual/api override.
+          <br />
+          <strong>Fallback behavior:</strong> API failures (provider error, rate limit,
+          timeout, invalid JSON) degrade to Manual Mode with the reason shown and recorded
+          in the run&rsquo;s route receipt — except under <code>api_only</code>, which errors
+          loudly instead.
+        </div>
+      </section>
+
+      <section className="rounded-lg border border-slate-200 p-4 dark:border-slate-800">
         <h2 className="text-sm font-medium">Model routes (per agent)</h2>
         <table className="mt-2 w-full text-sm">
           <thead>
@@ -63,6 +98,7 @@ export default async function SettingsPage() {
               <th className="py-1 pr-4">Agent</th>
               <th className="py-1 pr-4">Provider</th>
               <th className="py-1 pr-4">Model</th>
+              <th className="py-1 pr-4">Smart tier</th>
               <th className="py-1 pr-4">Effective mode</th>
               <th className="py-1">Overridden</th>
             </tr>
@@ -73,21 +109,29 @@ export default async function SettingsPage() {
               const base = MODEL_ROUTES[k];
               const overridden =
                 eff.provider !== base.provider || eff.model !== base.model || eff.mode !== base.mode;
+              const resolution = resolveExecution(k);
               return (
                 <tr key={k} className="border-t border-slate-100 dark:border-slate-900">
                   <td className="py-1.5 pr-4 font-mono text-xs">{k}</td>
                   <td className="py-1.5 pr-4">{eff.provider}</td>
                   <td className="py-1.5 pr-4 font-mono text-xs">{eff.model}</td>
+                  <td className="py-1.5 pr-4 text-xs text-slate-500">{eff.smartTier}</td>
                   <td className="py-1.5 pr-4">
                     <span
+                      title={resolution.reason}
                       className={`rounded px-1.5 py-0.5 text-xs ${
-                        resolveMode(k) === "api"
+                        resolution.effectiveMode === "api"
                           ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
                           : "bg-slate-100 text-slate-600 dark:bg-slate-900 dark:text-slate-400"
                       }`}
                     >
-                      {resolveMode(k)}
+                      {resolution.effectiveMode}
                     </span>
+                    {resolution.target && resolution.target.provider !== eff.provider && (
+                      <span className="ml-1 text-xs text-slate-400">
+                        via {resolution.target.provider}
+                      </span>
+                    )}
                   </td>
                   <td className="py-1.5 text-xs text-slate-500">{overridden ? "env" : "—"}</td>
                 </tr>
@@ -98,9 +142,12 @@ export default async function SettingsPage() {
         <div className="mt-3 rounded bg-slate-100 p-3 text-xs text-slate-600 dark:bg-slate-900 dark:text-slate-400">
           Override any route without code changes via <code>MODEL_ROUTES_JSON</code>, e.g.{" "}
           <code>
-            {`MODEL_ROUTES_JSON='{"generator":{"provider":"openai","model":"gpt-4o"}}'`}
+            {`MODEL_ROUTES_JSON='{"generator":{"provider":"openrouter","model":"openrouter/auto"}}'`}
           </code>
-          . Partial overrides merge with the defaults above.
+          . Partial overrides merge with the defaults above. OpenRouter model ids pass
+          through verbatim (<code>openrouter/auto</code>, <code>openrouter/free</code>,{" "}
+          <code>vendor/model:free</code>, …); routes falling through to OpenRouter without
+          an explicit id use <code>OPENROUTER_DEFAULT_MODEL</code>.
         </div>
       </section>
     </main>

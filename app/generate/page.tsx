@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { AgentRunner } from "@/components/agent-runner";
+import { WorkflowModeBar, type ModeChoice } from "@/components/mode-control";
 import { StrategyPreview } from "@/components/strategy-preview";
 import { ExportButton } from "@/components/export-button";
 import { draftToMarkdown } from "@/lib/export/markdown";
@@ -22,6 +23,7 @@ const PRESETS = ["", "persuasive", "explanatory", "personal_narrative"];
 
 export default function GeneratePage() {
   const [step, setStep] = useState<Step>("request");
+  const [wfMode, setWfMode] = useState<ModeChoice>("auto");
   const [request, setRequest] = useState("");
   const [preset, setPreset] = useState("");
 
@@ -100,6 +102,8 @@ export default function GeneratePage() {
         </p>
       </div>
 
+      <WorkflowModeBar value={wfMode} onChange={setWfMode} />
+
       <Stepper current={step} />
 
       {/* ── Step 1: request ─────────────────────────────────────────────── */}
@@ -126,6 +130,7 @@ export default function GeneratePage() {
           </div>
           {request.trim().length >= 15 && (
             <AgentRunner
+            modeOverride={wfMode}
               agentId="goalProfile"
               input={{ request, genrePreset: preset || undefined }}
               buttonLabel="Build goal profile"
@@ -180,6 +185,7 @@ export default function GeneratePage() {
             )}
           </div>
           <AgentRunner
+            modeOverride={wfMode}
             agentId="planner"
             input={{
               goalProfile: profile,
@@ -246,6 +252,7 @@ export default function GeneratePage() {
             </div>
           )}
           <AgentRunner
+            modeOverride={wfMode}
             agentId="generator"
             input={{
               goalProfile: profile,

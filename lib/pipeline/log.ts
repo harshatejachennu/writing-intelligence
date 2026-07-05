@@ -1,10 +1,13 @@
 import { getDb } from "@/lib/db/client";
 import type { ExecutionMode } from "@/lib/models/routes";
+import type { RouteReceipt } from "@/lib/models/execute";
 
 /**
  * Append a step to the pipeline audit log. Records mode + (for manual steps) the
  * exact prompt shown and the model the user says they used — so the future
  * fine-tuning dataset is clean regardless of how the output was produced.
+ * The route receipt adds full routing accounting: requested vs effective mode,
+ * attempted vs final provider/model, and why a fallback happened.
  * No-ops when the DB is not configured.
  */
 export interface PipelineStep {
@@ -17,6 +20,8 @@ export interface PipelineStep {
   usage?: { promptTokens?: number; completionTokens?: number };
   rawModel?: string;
   latencyMs?: number;
+  receipt?: RouteReceipt;
+  schemaValid?: boolean;
 }
 
 export async function logPipelineStep(step: PipelineStep): Promise<string | null> {
@@ -38,6 +43,13 @@ export async function logPipelineStep(step: PipelineStep): Promise<string | null
       prompt_tokens: step.usage?.promptTokens ?? null,
       completion_tokens: step.usage?.completionTokens ?? null,
       latency_ms: step.latencyMs ?? null,
+      requested_mode: step.receipt?.requestedMode ?? null,
+      attempted_provider: step.receipt?.attemptedProvider ?? null,
+      attempted_model: step.receipt?.attemptedModel ?? null,
+      final_provider: step.receipt?.finalProvider ?? null,
+      final_model: step.receipt?.finalModel ?? null,
+      fallback_reason: step.receipt?.fallbackReason ?? null,
+      schema_valid: step.schemaValid ?? null,
     })
     .select("id")
     .single();

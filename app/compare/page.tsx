@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { AgentRunner } from "@/components/agent-runner";
+import { WorkflowModeBar, type ModeChoice } from "@/components/mode-control";
 import type { Comparison } from "@/lib/schemas/comparison";
 
 export default function ComparePage() {
@@ -12,6 +13,8 @@ export default function ComparePage() {
   const [genre, setGenre] = useState("");
   const [verdict, setVerdict] = useState<Comparison | null>(null);
   const [savedId, setSavedId] = useState<string | null>(null);
+
+  const [wfMode, setWfMode] = useState<ModeChoice>("auto");
 
   const ready = leftText.trim().length >= 50 && rightText.trim().length >= 50;
 
@@ -27,6 +30,7 @@ export default function ComparePage() {
 
       {!verdict && (
         <div className="space-y-3">
+          <WorkflowModeBar value={wfMode} onChange={setWfMode} />
           <div className="grid gap-4 md:grid-cols-2">
             <div>
               <input
@@ -65,6 +69,7 @@ export default function ComparePage() {
           />
           {ready && (
             <AgentRunner
+              modeOverride={wfMode}
               agentId="compare"
               input={{ leftText, rightText, leftLabel, rightLabel, genre: genre || undefined }}
               buttonLabel="Compare"

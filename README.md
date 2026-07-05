@@ -48,6 +48,21 @@ key/DB/embedding status. Swap any route without code changes via
 failures degrade gracefully to Manual Mode (with the error shown); latency and token
 usage are recorded on every pipeline run.
 
+**Infra — OpenRouter + execution mode control.** `openrouter` is a first-class provider
+(`OPENROUTER_API_KEY`; OpenAI-compatible endpoint; model ids pass through verbatim —
+`openrouter/auto`, `openrouter/free`, `vendor/model:free`, …; `OPENROUTER_DEFAULT_MODEL`
+serves routes that fall through to OpenRouter). A global `EXECUTION_PREFERENCE`
+(`manual_only` · `api_only` · `smart` · `api_first_manual_fallback` ·
+`manual_first_api_optional`, default **smart**) decides how steps run: smart sends
+quality steps (analyzer, planner, generator, critic, reviser, inspiration) to Manual and
+structured steps to API when keyed. Every workflow page has an execution mode bar
+(Auto/Manual/API) and every agent step has its own auto/manual/api override. API
+failures (provider error, rate limit, timeout via `API_TIMEOUT_MS`, invalid JSON) fall
+back to Manual with the classified reason shown — except under `api_only`, which errors
+loudly. Every run writes a **route receipt** to `pipeline_runs`: requested vs effective
+mode, attempted vs final provider/model, fallback reason, schema validity, latency.
+Zero-key Manual operation is unchanged.
+
 **Phase 8 — Advanced UI.** **/compare**: two versions side by side → evidence-based
 verdict (what improved / got worse, per-dimension winners, recommended direction),
 saved to `comparisons`. **/inspiration**: Masterpiece Inspiration Mode — a synthetic

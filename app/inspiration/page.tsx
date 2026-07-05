@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { AgentRunner } from "@/components/agent-runner";
+import { WorkflowModeBar, type ModeChoice } from "@/components/mode-control";
 import { ExportButton } from "@/components/export-button";
 import type { Inspiration } from "@/lib/schemas/inspiration";
 
@@ -11,6 +12,7 @@ export default function InspirationPage() {
   const [genre, setGenre] = useState("");
   const [realTask, setRealTask] = useState("");
   const [result, setResult] = useState<Inspiration | null>(null);
+  const [wfMode, setWfMode] = useState<ModeChoice>("auto");
 
   return (
     <main className="space-y-6">
@@ -24,6 +26,7 @@ export default function InspirationPage() {
 
       {!result && (
         <div className="space-y-3">
+          <WorkflowModeBar value={wfMode} onChange={setWfMode} />
           <input
             value={topic}
             onChange={(e) => setTopic(e.target.value)}
@@ -52,6 +55,7 @@ export default function InspirationPage() {
           />
           {topic.trim().length >= 10 && (
             <AgentRunner
+              modeOverride={wfMode}
               agentId="inspiration"
               input={{
                 topic,
