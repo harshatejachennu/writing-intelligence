@@ -1,0 +1,100 @@
+{
+  "experiment": "unsupervised_draft_corpus_college_application_essays",
+  "created_for": "ProseLens draft/staging corpus experiment",
+  "corpus_status": "draft_staging",
+  "storage_policy": "metadata_only_in_ProseLens; no full essay bodies stored",
+  "entries": [
+    {
+      "working_title": "On Potatoes",
+      "source_name": "Johns Hopkins University Admissions — Essays That Worked",
+      "source_url": "https://apply.jhu.edu/hopkins-insider/on-potatoes/",
+      "school_program": "Johns Hopkins University undergraduate admissions; Essays That Worked",
+      "prompt": "Not stated on page; appears to be a college application personal statement/example essay.",
+      "author_public_attribution": "Madison",
+      "essay_type": "personal statement / values-through-mundane-object essay",
+      "main_theme": "Using the potato's versatility as a comic metaphor for intellectual breadth, flexibility, and liberal-arts fit.",
+      "why_it_is_worth_analyzing": "Strong object-as-metaphor engine, distinctive humorous voice, and a clean pivot from playful food taxonomy to genuine self-portrait. Admissions commentary notes the essay entertained while revealing outlook/personality and diverse interests.",
+      "likely_techniques": ["mundane object as metaphor", "humor and distinctive voice", "catalog/list escalation", "pivot from concrete object to abstract identity", "values shown through preference", "liberal-arts fit without naming every credential"],
+      "imitation_risks": "High risk of copying the quirky-food premise or over-forcing a metaphor; safer to study the move from playful specificity to transferable self-knowledge.",
+      "copyright_status_guess": "store_metadata_only",
+      "recommended_next_action": "paste_full_text_manually",
+      "corpus_status": "draft_staging"
+    },
+    {
+      "working_title": "Finding My Voice",
+      "source_name": "Johns Hopkins University Admissions — Essays That Worked",
+      "source_url": "https://apply.jhu.edu/hopkins-insider/finding-my-voice/",
+      "school_program": "Johns Hopkins University undergraduate admissions; Essays That Worked",
+      "prompt": "Not stated on page; appears to be a college application personal statement/example essay.",
+      "author_public_attribution": "Jerry",
+      "essay_type": "personal statement / vulnerability-to-service narrative",
+      "main_theme": "A speech impediment and debate journey become a story of earned voice, leadership, and helping younger students speak.",
+      "why_it_is_worth_analyzing": "Good model of vulnerability without self-pity: the opening scene creates stakes, the history explains difficulty, and the conclusion returns to service/impact rather than triumphalism. Admissions commentary says it added depth to an already-known activity.",
+      "likely_techniques": ["vulnerability without self-pity", "narrative arc", "callback frame", "concrete proof after abstract reflection", "activity depth beyond résumé", "service impact"],
+      "imitation_risks": "Medium-high; students may imitate trauma-to-victory structure too directly or exaggerate adversity. Analyze for structure and evidence, not topic replication.",
+      "copyright_status_guess": "store_metadata_only",
+      "recommended_next_action": "paste_full_text_manually",
+      "corpus_status": "draft_staging"
+    },
+    {
+      "working_title": "Left and Right Don't Exist",
+      "source_name": "Johns Hopkins University Admissions — Essays That Worked",
+      "source_url": "https://apply.jhu.edu/hopkins-insider/left-and-right-dont-exist/",
+      "school_program": "Johns Hopkins University undergraduate admissions; Essays That Worked 2025 page / Hopkins Insider",
+      "prompt": "Not stated on page; appears to be a college application personal statement/example essay.",
+      "author_public_attribution": "Stella; Los Angeles, California",
+      "essay_type": "personal statement / transferable-lesson essay",
+      "main_theme": "A student pilot's lesson about directional perspective becomes a framework for journalism, listening, and community storytelling.",
+      "why_it_is_worth_analyzing": "Strong example of transferring a concrete lesson from one domain into another. The essay links flying to journalism without reducing either to a gimmick; admissions commentary emphasizes perspective, listening, application, and impact.",
+      "likely_techniques": ["domain-transfer metaphor", "precision of language", "intellectual/community bridge", "values shown through action", "activity synthesis", "callback conclusion"],
+      "imitation_risks": "Medium; aviation hook is distinctive and should not be copied. Best studied for the cross-domain bridge and repeated perspective motif.",
+      "copyright_status_guess": "store_metadata_only",
+      "recommended_next_action": "paste_full_text_manually",
+      "corpus_status": "draft_staging"
+    },
+    {
+      "working_title": "Where Math Collides With Art",
+      "source_name": "Johns Hopkins University Admissions — Essays That Worked",
+      "source_url": "https://apply.jhu.edu/hopkins-insider/where-math-collides-with-art/",
+      "school_program": "Johns Hopkins University undergraduate admissions; Class of 2029 Essays That Worked",
+      "prompt": "Not stated on page; appears to be a college application personal statement/example essay.",
+      "author_public_attribution": "Anthony M., '29",
+      "essay_type": "personal statement / academic-technical passion essay",
+      "main_theme": "Mathematics as visual storytelling, teaching tool, and civic/creative force.",
+      "why_it_is_worth_analyzing": "Excellent academic-passion essay because it avoids a dry subject declaration: it opens with a cinematic problem, shows teaching/impact, and returns to the opening image with a broadened meaning. Admissions commentary highlights knowledge pursuit plus real-world impact.",
+      "likely_techniques": ["academic or technical passion", "cinematic hook", "abstract concept made concrete", "teaching as proof of mastery", "concrete proof after abstract reflection", "callback conclusion"],
+      "imitation_risks": "Medium; students may over-write technical metaphors or claim impact without evidence. Analyze how examples substantiate passion.",
+      "copyright_status_guess": "store_metadata_only",
+      "recommended_next_action": "paste_full_text_manually",
+      "corpus_status": "draft_staging"
+    },
+    {
+      "working_title": "Be the Salt of the Earth",
+      "source_name": "Johns Hopkins University Admissions — Essays That Worked",
+      "source_url": "https://apply.jhu.edu/hopkins-insider/be-the-salt-of-the-earth/",
+      "school_program": "Johns Hopkins University undergraduate admissions; Class of 2029 Essays That Worked",
+      "prompt": "Not stated on page; appears to be a college application personal statement/example essay.",
+      "author_public_attribution": "Maria G., '29",
+      "essay_type": "personal statement / culture-family-place identity essay",
+      "main_theme": "Salt becomes a motif for family, health, migration, cultural exchange, diplomacy, and youth advocacy.",
+      "why_it_is_worth_analyzing": "Useful for studying how an everyday substance can braid family anecdote, body/health experience, multicultural place identity, and service commitments. Admissions commentary explicitly notes salt as a driver for awareness of communities and action-oriented college engagement.",
+      "likely_techniques": ["mundane object as metaphor", "culture/family/place identity", "global-to-personal scaling", "values shown through action", "service/community impact", "abstract reflection anchored in sensory detail"],
+      "imitation_risks": "Medium-high; broad symbolic objects can become diffuse. Analyze whether each salt reference earns its transition rather than copying the symbol.",
+      "copyright_status_guess": "store_metadata_only",
+      "recommended_next_action": "paste_full_text_manually",
+      "corpus_status": "draft_staging"
+    }
+  ],
+  "manual_mode_batches": [
+    {
+      "batch_name": "Batch 1 — metaphor, voice, and vulnerability",
+      "entries": ["On Potatoes", "Finding My Voice", "Left and Right Don't Exist"],
+      "analysis_focus": "How concrete hooks become identity claims; how voice and vulnerability stay controlled; how conclusions return with added meaning."
+    },
+    {
+      "batch_name": "Batch 2 — academic passion and identity-to-impact",
+      "entries": ["Where Math Collides With Art", "Be the Salt of the Earth"],
+      "analysis_focus": "How intellectual curiosity, culture/place identity, and service are supported by proof rather than résumé summary."
+    }
+  ]
+}
