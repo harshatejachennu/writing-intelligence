@@ -43,6 +43,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <a href="/history" className="hover:text-slate-900 dark:hover:text-slate-100">
                 History
               </a>
+              <a href="/dataset" className="hover:text-slate-900 dark:hover:text-slate-100">
+                Dataset
+              </a>
               <a href="/settings" className="hover:text-slate-900 dark:hover:text-slate-100">
                 Settings
               </a>

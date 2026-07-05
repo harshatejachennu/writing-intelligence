@@ -6,6 +6,17 @@ import type { Generation } from "@/lib/schemas/generation";
 import { profileQueryText } from "@/lib/schemas/goal-profile";
 import { embedText } from "@/lib/retrieval/embed";
 
+/** Link a generation run to the pipeline_runs receipt that produced it. */
+export async function linkGenerationReceipt(runId: string, pipelineRunId: string): Promise<void> {
+  const db = getDb();
+  if (!db) return;
+  const { error } = await db
+    .from("generation_runs")
+    .update({ pipeline_run_id: pipelineRunId })
+    .eq("id", runId);
+  if (error) console.error("[generation_runs] receipt link failed:", error.message);
+}
+
 /** Persist a goal profile (embedding optional — future "profiles like this"). */
 export async function saveGoalProfile(profile: GoalProfile): Promise<string | null> {
   const db = getDb();

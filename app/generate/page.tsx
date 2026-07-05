@@ -6,6 +6,7 @@ import { WorkflowModeBar, type ModeChoice } from "@/components/mode-control";
 import { StrategyPreview } from "@/components/strategy-preview";
 import { ExportButton } from "@/components/export-button";
 import { draftToMarkdown } from "@/lib/export/markdown";
+import { DatasetReviewForm } from "@/components/dataset-review-form";
 import { profileQueryText, type GoalProfile } from "@/lib/schemas/goal-profile";
 import type { StrategyPlan } from "@/lib/schemas/strategy-plan";
 import type { Generation } from "@/lib/schemas/generation";
@@ -37,23 +38,6 @@ export default function GeneratePage() {
 
   const [generation, setGeneration] = useState<Generation | null>(null);
   const [runId, setRunId] = useState<string | null>(null);
-  const [exampleSaved, setExampleSaved] = useState<"idle" | "saving" | "saved" | "failed">("idle");
-
-  async function saveAsExample() {
-    if (!runId) return;
-    setExampleSaved("saving");
-    try {
-      const res = await fetch("/api/saved-outputs", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ generationRunId: runId, tags: [profile?.genre ?? "unknown"] }),
-      });
-      const json = await res.json();
-      setExampleSaved(json.ok ? "saved" : "failed");
-    } catch {
-      setExampleSaved("failed");
-    }
-  }
 
   const [voices, setVoices] = useState<Array<{ id: string; name: string; profile: unknown }>>([]);
   const [voiceId, setVoiceId] = useState("");
@@ -294,21 +278,7 @@ export default function GeneratePage() {
                   choicesExplained: generation.choices_explained,
                 })}
               />
-              {runId && (
-                <button
-                  onClick={saveAsExample}
-                  disabled={exampleSaved === "saving" || exampleSaved === "saved"}
-                  className="rounded border border-emerald-400 px-2.5 py-1 text-xs text-emerald-700 hover:bg-emerald-50 disabled:opacity-50 dark:border-emerald-800 dark:text-emerald-400 dark:hover:bg-emerald-950"
-                >
-                  {exampleSaved === "saved"
-                    ? "✓ Saved as example"
-                    : exampleSaved === "saving"
-                      ? "Saving…"
-                      : exampleSaved === "failed"
-                        ? "Retry save as example"
-                        : "★ Save as example"}
-                </button>
-              )}
+              {runId && <DatasetReviewForm generationRunId={runId} />}
               <span className="text-xs text-slate-500">
                 {runId ? `run saved (${runId.slice(0, 8)}…)` : "not saved (no DB)"}
               </span>
@@ -371,7 +341,6 @@ export default function GeneratePage() {
               setFacts("");
               setGeneration(null);
               setRunId(null);
-              setExampleSaved("idle");
             }}
             className="text-sm text-slate-500 hover:underline"
           >

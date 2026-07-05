@@ -2,7 +2,7 @@ import type { ExecutionMode } from "@/lib/models/routes";
 import type { RouteReceipt } from "@/lib/models/execute";
 import { saveAnalysis, logPipelineStep } from "./log";
 import { saveExtraction } from "./techniques";
-import { saveGoalProfile, saveStrategyPlan, saveGeneration } from "./generation";
+import { saveGoalProfile, saveStrategyPlan, saveGeneration, linkGenerationReceipt } from "./generation";
 import { saveCritique, saveRevision } from "./critique";
 import { saveSourceText } from "./corpus";
 import { saveVoiceProfile } from "./voice";
@@ -163,6 +163,12 @@ export async function persistAgentOutput(args: {
     receipt: args.receipt,
     schemaValid: args.schemaValid,
   });
+
+  // Link the generator's run to its pipeline_runs receipt so dataset exports
+  // carry full provenance (requested/effective mode, provider, fallback).
+  if (args.agentId === "generator" && savedId && pipelineRunId) {
+    await linkGenerationReceipt(savedId, pipelineRunId);
+  }
 
   return { savedId, passageId, pipelineRunId, documentId, cardIds, techniqueSlugs };
 }

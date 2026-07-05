@@ -48,6 +48,30 @@ key/DB/embedding status. Swap any route without code changes via
 failures degrade gracefully to Manual Mode (with the error shown); latency and token
 usage are recorded on every pipeline run.
 
+**Phase 9 Prep — dataset collection (no training).** On a generated draft, **★ Promote
+to dataset** opens a quality review (overall/usefulness/originality 1–10, schema_valid,
+human_approved, notes, optional reject_reason) before promotion. The **/dataset** page
+lists promoted examples with filters (agent, genre, task type, manual_model, min
+quality, date range) and exports **approved-only** examples as **JSONL** (fine-tuning
+shape), **JSON** (analysis), or **CSV** (summary) via `GET /api/dataset/export`. Each
+exported example carries full provenance: goal_profile, strategy_plan, retrieved_cards,
+final_output, critique_scores, revision history, manual_model, and the route receipt —
+so Manual-Mode metadata is preserved. Copyrighted source bodies are redacted unless
+user-owned / public-domain / licensed. A persistent banner states this is collection
+for **future** evaluation/fine-tuning — nothing is trained. Rejected examples are stored
+(with reason) but never exported. Verification: `npm run test:dataset` (40 checks).
+
+**Calibration — Maria salt-essay pass.** The Analyzer bans absolute praise
+("perfectly executes", "masterfully", …) unless the same field cites rubric-level
+evidence, and must note weaknesses with the same evidence standard. The Technique
+Extractor now returns exactly **3 core + 3 secondary + 2 failure-mode** cards, each
+required to be useful across ≥2 genres (college-essay-only cards are rejected), with
+new fields: `card_role`, `specificity_level` (obvious/subtle/advanced),
+`transfer_difficulty` (low/medium/high), and `best_for_tasks` (feeds retrieval, so
+task-shaped queries like "postmortem introductions" hit). Cards saved before this
+pass still parse — the new fields are optional on stored cards, required for new
+extractions. Fixture + 35-check suite: `npm run test:maria`.
+
 **Infra — OpenRouter + execution mode control.** `openrouter` is a first-class provider
 (`OPENROUTER_API_KEY`; OpenAI-compatible endpoint; model ids pass through verbatim —
 `openrouter/auto`, `openrouter/free`, `vendor/model:free`, …; `OPENROUTER_DEFAULT_MODEL`
@@ -166,6 +190,7 @@ app/                     Next.js App Router (pages + /api routes)
   corpus/                Corpus Library (curate sources, legal guards)
   voice/                 Voice profile inference + saved profiles
   history/               Saved analyses list + detail view (requires Supabase)
+  dataset/               Promoted examples + filters + approved-only export
   settings/              Effective model routes + env status
   api/prompt/build       Render the exact agent prompt + resolved mode
   api/prompt/submit      Validate a pasted response (manual) or run the provider (api)
